@@ -3,11 +3,11 @@
         {
             "name": "Target 1",
             "includePath": [
-                "e:\\智能大棚\\STM32C8T6\\Start",
-                "e:\\智能大棚\\STM32C8T6\\Library",
-                "e:\\智能大棚\\STM32C8T6\\User",
-                "e:\\智能大棚\\STM32C8T6\\System",
-                "e:\\智能大棚\\STM32C8T6\\Hardware",
+                "e:\\智能温室大棚\\STM32C8T6\\Start",
+                "e:\\智能温室大棚\\STM32C8T6\\Library",
+                "e:\\智能温室大棚\\STM32C8T6\\User",
+                "e:\\智能温室大棚\\STM32C8T6\\System",
+                "e:\\智能温室大棚\\STM32C8T6\\Hardware",
                 "E:\\Keil5\\ARM\\ARMCC\\include",
                 "E:\\Keil5\\ARM\\ARMCC\\include\\rw"
             ],
