@@ -3,14 +3,12 @@
         {
             "name": "Target 1",
             "includePath": [
-                "e:\\智能温室大棚\\STM32C8T6\\Start",
-                "e:\\智能温室大棚\\STM32C8T6\\Library",
-                "e:\\智能温室大棚\\STM32C8T6\\User",
-                "e:\\智能温室大棚\\STM32C8T6\\System",
-                "e:\\智能温室大棚\\STM32C8T6\\Hardware",
-                "E:\\jansson-2.13.1\\src",
-                "E:\\Keil5\\ARM\\ARMCC\\include",
-                "E:\\Keil5\\ARM\\ARMCC\\include\\rw"
+                "d:\\vscode_workspace\\Intelligent-Greenhouse\\STM32C8T6\\Start",
+                "d:\\vscode_workspace\\Intelligent-Greenhouse\\STM32C8T6\\Library",
+                "d:\\vscode_workspace\\Intelligent-Greenhouse\\STM32C8T6\\User",
+                "d:\\vscode_workspace\\Intelligent-Greenhouse\\STM32C8T6\\System",
+                "d:\\vscode_workspace\\Intelligent-Greenhouse\\STM32C8T6\\Hardware",
+                "E:\\jansson-2.13.1\\src"
             ],
             "defines": [
                 "USE_STDPERIPH_DRIVER",

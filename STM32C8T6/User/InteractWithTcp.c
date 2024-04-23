@@ -1,3 +1,4 @@
+
 #include "stm32f10x.h"// Device header
 #include "String.h"
 #include "Delay.h"
@@ -20,12 +21,11 @@
 #include "sgp30.h"
 #include "stdlib.h"
 #include "MyRtc.h"
-uint8_t mode;
-float airT_Max = 25, airT_Min = 10, airH_Max = 80, airH_Min = 50, 
-	ph_Max = 9, ph_Min = 7, soilT_Max = 25, soilT_Min = 10, soilH_Max = 80, soilH_Min = 50; 
-uint16_t co2_Max = 2000, co2_Min = 500, light_Max = 2000 , light_Min = 100;
-uint8_t Led_Mode, Fan_Mode, Valve1_Mode, Valve2_Mode, Pump_Mode, HeatingCore_Mode, Curtain_Mode;
-uint16_t Led_WorkingTime[] = {480, 1080}, Fan_WorkingTime[] = {480, 1080}, Pump_WorkingTime[] = {480, 1080}, Curtain_WorkingTime[] = {480, 1080};
+#include "MyFlash.h"
+#include "Store.h"
+
+extern Flash Store_Data1[];
+
 void Module_Init(void)
 {
 	OLED_Init();
@@ -112,37 +112,39 @@ void ControlDevice(void)
 							key = json_object_iter_key(iter);
 							value = json_object_iter_value(iter);
 
-							if(strcmp(key, "airT_Max") == 0) airT_Max = json_real_value(value);
-							else if(strcmp(key, "airT_Min") == 0) airT_Min = json_real_value(value);
-							else if(strcmp(key, "airH_Max") == 0) airH_Max = json_real_value(value);
-							else if(strcmp(key, "airH_Min") == 0) airH_Min = json_real_value(value);
-							else if(strcmp(key, "ph_Max") == 0) ph_Max = json_real_value(value);
-							else if(strcmp(key, "soilT_Max") == 0) soilT_Max = json_real_value(value);
-							else if(strcmp(key, "soilT_Min") == 0) soilT_Min = json_real_value(value);
-							else if(strcmp(key, "soilH_Max") == 0) soilH_Max = json_real_value(value);
-							else if(strcmp(key, "soilH_Min") == 0) soilH_Min = json_real_value(value);
-							else if(strcmp(key, "co2_Max") == 0) co2_Max = json_integer_value(value);
-							else if(strcmp(key, "co2_Min") == 0) co2_Min = json_real_value(value);
-							else if(strcmp(key, "light_Max") == 0) light_Max = json_integer_value(value);
-							else if(strcmp(key, "light_Min") == 0) light_Min = json_integer_value(value);
-							else if(strcmp(key, "Led_StartTime") == 0) Led_WorkingTime[0] = json_integer_value(value);
-							else if(strcmp(key, "Led_EndTime") == 0) Led_WorkingTime[1] = json_integer_value(value);
-							else if(strcmp(key, "Fan_StartTime") == 0) Fan_WorkingTime[0] = json_integer_value(value);
-							else if(strcmp(key, "Fan_EndTime") == 0) Fan_WorkingTime[1] = json_integer_value(value);
-							else if(strcmp(key, "Pump_StartTime") == 0) Pump_WorkingTime[0] = json_integer_value(value);
-							else if(strcmp(key, "Pump_EndTime") == 0) Pump_WorkingTime[1] = json_integer_value(value);
-							else if(strcmp(key, "Curtain_StartTime") == 0) Curtain_WorkingTime[0] = json_integer_value(value);
-							else if(strcmp(key, "Curtain_EndTime") == 0) Curtain_WorkingTime[1] = json_integer_value(value);
-							else if(strcmp(key, "Led_Mode") == 0) Led_Mode = json_integer_value(value);
-							else if(strcmp(key, "Fan_Mode") == 0) Fan_Mode = json_integer_value(value);
-							else if(strcmp(key, "Valve1_Mode") == 0) Valve1_Mode = json_integer_value(value);
-							else if(strcmp(key, "Valve2_Mode") == 0) Valve2_Mode = json_integer_value(value);
-							else if(strcmp(key, "Pump_Mode") == 0) Pump_Mode = json_integer_value(value);
-							else if(strcmp(key, "HeatingCore_Mode") == 0) HeatingCore_Mode = json_integer_value(value);
-							else if(strcmp(key, "Curtain_Mode") == 0) Curtain_Mode = json_integer_value(value);
+							if(strcmp(key, "airT_Max") == 0) Store_Data1[0].value = json_real_value(value);
+							else if(strcmp(key, "airT_Min") == 0) Store_Data1[1].value = json_real_value(value);
+							else if(strcmp(key, "airH_Max") == 0) Store_Data1[2].value = json_real_value(value);
+							else if(strcmp(key, "airH_Min") == 0) Store_Data1[3].value = json_real_value(value);
+							else if(strcmp(key, "ph_Max") == 0) Store_Data1[4].value = json_real_value(value);
+							else if(strcmp(key, "ph_Min") == 0) Store_Data1[5].value = json_real_value(value);
+							else if(strcmp(key, "soilT_Max") == 0) Store_Data1[6].value = json_real_value(value);
+							else if(strcmp(key, "soilT_Min") == 0) Store_Data1[7].value = json_real_value(value);
+							else if(strcmp(key, "soilH_Max") == 0) Store_Data1[8].value = json_real_value(value);
+							else if(strcmp(key, "soilH_Min") == 0) Store_Data1[9].value = json_real_value(value);
+							else if(strcmp(key, "co2_Max") == 0) Store_Data2[0] = json_integer_value(value);
+							else if(strcmp(key, "co2_Min") == 0) Store_Data2[1] = json_real_value(value);
+							else if(strcmp(key, "light_Max") == 0) Store_Data2[2] = json_integer_value(value);
+							else if(strcmp(key, "light_Min") == 0) Store_Data2[3] = json_integer_value(value);
+							else if(strcmp(key, "Led_StartTime") == 0) Store_Data2[4] = json_integer_value(value);
+							else if(strcmp(key, "Led_EndTime") == 0) Store_Data2[5] = json_integer_value(value);
+							else if(strcmp(key, "Fan_StartTime") == 0) Store_Data2[6] = json_integer_value(value);
+							else if(strcmp(key, "Fan_EndTime") == 0) Store_Data2[7] = json_integer_value(value);
+							else if(strcmp(key, "Pump_StartTime") == 0) Store_Data2[8] = json_integer_value(value);
+							else if(strcmp(key, "Pump_EndTime") == 0) Store_Data2[9] = json_integer_value(value);
+							else if(strcmp(key, "Curtain_StartTime") == 0) Store_Data2[10] = json_integer_value(value);
+							else if(strcmp(key, "Curtain_EndTime") == 0) Store_Data2[11] = json_integer_value(value);
+							else if(strcmp(key, "Led_Mode") == 0) Store_Data2[12] = json_integer_value(value);
+							else if(strcmp(key, "Fan_Mode") == 0) Store_Data2[13] = json_integer_value(value);
+							else if(strcmp(key, "Valve1_Mode") == 0) Store_Data2[14] = json_integer_value(value);
+							else if(strcmp(key, "Valve2_Mode") == 0) Store_Data2[15] = json_integer_value(value);
+							else if(strcmp(key, "Pump_Mode") == 0) Store_Data2[16] = json_integer_value(value);
+							else if(strcmp(key, "HeatingCore_Mode") == 0) Store_Data2[17] = json_integer_value(value);
+							else if(strcmp(key, "Curtain_Mode") == 0) Store_Data2[18] = json_integer_value(value);
 
 							iter = json_object_iter_next(root, iter);
 						}
+						Store_Save();
 					}
 					json_decref(root);
 				}
@@ -160,13 +162,13 @@ void ControlDevice(void)
 						Switch = json_integer_value(json_object_get(root, "switch"));
 					}
 					json_decref(root);
-					if(strcmp(identifier,"lightControl") == 0 && Led_Mode == 0) {LED_Control(Switch);}
-					else if(strcmp(identifier,"fanControl") == 0 && Fan_Mode == 0) {Motor_Control(Switch);}
-					else if(strcmp(identifier,"pumpControl") == 0 && Pump_Mode == 0) {Pump_Control(Switch);}
-					else if(strcmp(identifier,"valve1Control") == 0 && Valve1_Mode == 0) {Valve1_Control(Switch);}
-					else if(strcmp(identifier,"valve2Control") == 0 && Valve2_Mode == 0) {Valve2_Control(Switch);}
-					else if(strcmp(identifier,"hcControl") == 0 && HeatingCore_Mode == 0) {HeatingCore_Control(Switch);}
-					else if(strcmp(identifier,"smotorControl") == 0 && Curtain_Mode == 0) {SteeperMotor_Control(Switch);}
+					if(strcmp(identifier,"lightControl") == 0 && Store_Data2[12] == 0) {LED_Control(Switch);}
+					else if(strcmp(identifier,"fanControl") == 0 && Store_Data2[13] == 0) {Motor_Control(Switch);}
+					else if(strcmp(identifier,"valve1Control") == 0 && Store_Data2[14] == 0) {Valve1_Control(Switch);}
+					else if(strcmp(identifier,"valve2Control") == 0 && Store_Data2[15] == 0) {Valve2_Control(Switch);}
+					else if(strcmp(identifier,"pumpControl") == 0 && Store_Data2[16] == 0) {Pump_Control(Switch);}
+					else if(strcmp(identifier,"hcControl") == 0 && Store_Data2[17] == 0) {HeatingCore_Control(Switch);}
+					else if(strcmp(identifier,"smotorControl") == 0 && Store_Data2[18] == 0) {SteeperMotor_Control(Switch);}
 				}
 
 				Serial_OledShowString(json);
@@ -198,97 +200,96 @@ void ControlDevice(void)
 		}
 	}
 	MyRTC_ReadTime();
-	switch (Led_Mode)
+	switch (Store_Data2[12])//LED
 	{
 		case 1:
 		{
-			if(light < light_Min) LED_Control(1);
-			else if(light > light_Max) LED_Control(0);
+			if(light < Store_Data2[3]) LED_Control(1);
+			else if(light > Store_Data2[2]) LED_Control(0);
 			break;	
 		}
 		case 2:
 		{
 			uint16_t current_time;
 			current_time = MyRTC_Time[3] * 60 + MyRTC_Time[4];
-			if((current_time - Led_WorkingTime[0]) >= 0 &&  (current_time - Led_WorkingTime[1]) <= 0) LED_Control(1);
+			if((current_time - Store_Data2[4]) >= 0 &&  (current_time - Store_Data2[5]) <= 0) LED_Control(1);
 			else LED_Control(0);
 			break;
 		}
 	}
-	switch (Fan_Mode)
+	switch (Store_Data2[13])//FAN
 	{
 		case 1:
 		{
-			if(CO2Data > co2_Max) Motor_Control(1);
-			else if(CO2Data > co2_Min) Motor_Control(0);
+			if(CO2Data > Store_Data2[0]) Motor_Control(1);
+			else if(CO2Data > Store_Data2[1]) Motor_Control(0);
 			break;	
 		}
 		case 2:
 		{
 			uint16_t current_time = MyRTC_Time[3] * 60 + MyRTC_Time[4];
-			if((current_time - Fan_WorkingTime[0]) >=0 &&  (current_time - Fan_WorkingTime[1]) <=0) Motor_Control(1);
+			if((current_time - Store_Data2[6]) >=0 &&  (current_time - Store_Data2[7]) <=0) Motor_Control(1);
 			else Motor_Control(0);
 			break;
 		}
 	}
-	switch (Valve1_Mode)
+	switch (Store_Data2[14])//Valve1
 	{
 		case 1:
 		{
-			if(ph_value < ph_Min) Valve1_Control(1);
+			if(ph_value < Store_Data1[5].value) Valve1_Control(1);
 			else Valve1_Control(0);
 			break;
 		}	
 	}
-	switch (Valve2_Mode)
+	switch (Store_Data2[15])//Valve2
 	{
 		case 1:
 		{
-			if(ph_value > ph_Max) Valve1_Control(1);
+			if(ph_value > Store_Data1[4].value) Valve1_Control(1);
 			else Valve1_Control(0);
 			break;
 		}	
 	}
-	switch (Curtain_Mode)
+	switch (Store_Data2[16])//Curtain
 	{
 		case 1:
 		{
-			if(light < light_Min) LED_Control(1);
-			else if(light > light_Max) LED_Control(0);
+			if(light < Store_Data2[3]) LED_Control(1);
+			else if(light > Store_Data2[2]) LED_Control(0);
 			break;
 		}	
 		case 2:
 		{
 			uint16_t current_time = MyRTC_Time[3] * 60 + MyRTC_Time[4];
-			if((current_time - Curtain_WorkingTime[0]) >=0 &&  (current_time - Curtain_WorkingTime[1]) <=0) SteeperMotor_Control(1);
+			if((current_time - Store_Data2[10]) >=0 &&  (current_time - Store_Data2[11]) <=0) SteeperMotor_Control(1);
 			else SteeperMotor_Control(0);
 			break;
 		}
 	}
-	switch (Pump_Mode)
+	switch (Store_Data2[17])//Pump
 	{
 		case 1:
 		{
-			if(soil_moisture < soilH_Min) Pump_Control(1);
-			else if(soil_moisture > soilH_Max) Pump_Control(0);
+			if(soil_moisture < Store_Data1[9].value) Pump_Control(1);
+			else if(soil_moisture > Store_Data1[8].value) Pump_Control(0);
 			break;	
 		}
 		case 2:
 		{
 			uint16_t current_time = MyRTC_Time[3] * 60 + MyRTC_Time[4];
-			if((current_time - Pump_WorkingTime[0]) >=0 &&  (current_time - Pump_WorkingTime[1]) <=0) Pump_Control(1);
+			if((current_time - Store_Data2[8]) >=0 &&  (current_time - Store_Data2[9]) <=0) Pump_Control(1);
 			else Pump_Control(0);
 			break;
 		}
 	}
-	switch (HeatingCore_Mode)
+	switch (Store_Data2[18])//HeatingCore
 	{
 		case 1:
 		{
-			if(soil_temperature < soilT_Min) HeatingCore_Control(1);
-			else if(soil_temperature > soilT_Max) HeatingCore_Control(0);
+			if(soil_temperature < Store_Data1[7].value) HeatingCore_Control(1);
+			else if(soil_temperature > Store_Data1[6].value) HeatingCore_Control(0);
 			break;	
 		}
 	}
 }
-

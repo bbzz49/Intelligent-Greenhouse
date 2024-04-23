@@ -690,6 +690,16 @@
               <FileType>5</FileType>
               <FilePath>.\System\MyFlash.h</FilePath>
             </File>
+            <File>
+              <FileName>Store.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\System\Store.c</FilePath>
+            </File>
+            <File>
+              <FileName>Store.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\System\Store.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
