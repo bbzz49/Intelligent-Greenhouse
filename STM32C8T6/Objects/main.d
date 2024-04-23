@@ -35,8 +35,15 @@
 .\objects\main.o: .\System\sys.h
 .\objects\main.o: .\Hardware\Valve1.h
 .\objects\main.o: .\Hardware\Motor.h
+.\objects\main.o: .\Hardware\OLED.h
 .\objects\main.o: .\Hardware\HeatingCore.h
 .\objects\main.o: .\Hardware\Serial.h
 .\objects\main.o: .\Hardware\_28BYJ48.h
 .\objects\main.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\main.o: E:\Keil5\ARM\ARMCC\Bin\..\include\string.h
+.\objects\main.o: .\Hardware\Esp8266.h
+.\objects\main.o: E:\jansson-2.13.1\src\jansson.h
+.\objects\main.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\objects\main.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\objects\main.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson_config.h
+.\objects\main.o: .\System\MyRtc.h

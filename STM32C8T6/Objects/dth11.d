@@ -34,8 +34,8 @@
 .\objects\dth11.o: Hardware\Serial.h
 .\objects\dth11.o: E:\Keil5\ARM\ARMCC\Bin\..\include\string.h
 .\objects\dth11.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
-.\objects\dth11.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson.h
-.\objects\dth11.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\objects\dth11.o: E:\jansson-2.13.1\src\jansson.h
 .\objects\dth11.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\objects\dth11.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\dth11.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson_config.h
 .\objects\dth11.o: .\User\InteractWithTcp.h

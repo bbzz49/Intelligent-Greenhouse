@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Start;.\Library;.\User;.\System;.\Hardware</IncludePath>
+              <IncludePath>.\Start;.\Library;.\User;.\System;.\Hardware;E:\jansson-2.13.1\src</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -679,6 +679,16 @@
               <FileName>MyRtc.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\System\MyRtc.h</FilePath>
+            </File>
+            <File>
+              <FileName>MyFlash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\System\MyFlash.c</FilePath>
+            </File>
+            <File>
+              <FileName>MyFlash.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\System\MyFlash.h</FilePath>
             </File>
           </Files>
         </Group>

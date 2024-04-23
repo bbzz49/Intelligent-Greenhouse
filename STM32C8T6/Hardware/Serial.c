@@ -1,9 +1,8 @@
-﻿#include "stm32f10x.h"                  // Device header
+#include "stm32f10x.h"                  // Device header
 #include "OLED.h"
 #include "Serial.h"
 #include "String.h"
 char Serial_RxFromEspBuf[500];
-char Serial_RxFromTcpBuf[500];
 char Rx_Temp[500];
 uint8_t Serial_RxFlag;//串口是否完整接收一个定义的字符串
 uint16_t pRx_State;
@@ -94,14 +93,10 @@ void Serial_SendNumber(uint32_t Number,uint8_t Length)
 
 void Serial_RxFromEspBuf_Clear()
 {	
+	Serial_RxFlag = 0;
 	memset(Serial_RxFromEspBuf, 0, sizeof Serial_RxFromEspBuf);
 }
 
-void Serial_RxFromTcpBuf_Clear()
-{	
-	Serial_RxFlag = 0;
-	memset(Serial_RxFromTcpBuf, 0, sizeof Serial_RxFromTcpBuf);
-}
 
 uint8_t Serial_GetRxFlag(void)
 {
@@ -142,25 +137,11 @@ void USART1_IRQHandler(void)
 		uint8_t RxData = USART_ReceiveData(USART1);
 		if(pRx_State > 498) pRx_State = 0;
 		if(RxData == '\'') RxData = '\"';
-		if(Rx_State == 1)//状态机为1，表示当前在等待正常字节数据
+		if(Rx_State == 1)
 		{ 
-			if(RxData == '\r')//接收到ESP8266一次通信结束标志之一，把状态机改为2
+			if(RxData == '\r')
 			{
 				Rx_State = 2;
-			}
-			else if(RxData == ':')
-			{
-				if(strstr(Rx_Temp, "IPD") != NULL)
-				{
-					pRx_State = 0;
-					Rx_State = 3;
-					memset(Rx_Temp, 0, sizeof Rx_Temp);
-				}
-				else
-				{
-					Rx_Temp[pRx_State] = RxData;
-					pRx_State ++;
-				}
 			}
 			else
 			{	
@@ -168,11 +149,12 @@ void USART1_IRQHandler(void)
 				pRx_State ++;
 			}
 		} 
-		else if(Rx_State == 2)//状态机为2，等待ESP8266一次通信结束的最后标志，把状态机改为1，等待下次通信
+		else if(Rx_State == 2)
 		{
 			if(RxData == '\n')
 			{
 				Rx_State = 1;
+				Rx_Temp[pRx_State] = RxData;
 				pRx_State = 0;
 				if((strlen(Rx_Temp) + strlen(Serial_RxFromEspBuf)) < 500)
 				{
@@ -180,37 +162,11 @@ void USART1_IRQHandler(void)
 				}
 				else
 				{
-					memset(Serial_RxFromEspBuf, 0, sizeof Serial_RxFromTcpBuf);
+					memset(Serial_RxFromEspBuf, 0, sizeof Serial_RxFromEspBuf);
 					strcat(Serial_RxFromEspBuf, Rx_Temp);
 				}
 				memset(Rx_Temp, 0, sizeof Rx_Temp);
-			}
-		}
-		else if(Rx_State == 3)
-		{
-			if(RxData == '}')//接收到TCP一次通信结束标志，把状态机改为1，等待下次通信
-			{
-				Rx_State = 1;
-				Rx_Temp[pRx_State] = RxData;
-				pRx_State ++;
-				Rx_Temp[pRx_State] = '\n';
-				if((strlen(Rx_Temp) + strlen(Serial_RxFromTcpBuf)) < 500)
-				{
-					strcat(Serial_RxFromTcpBuf, Rx_Temp);
-				}
-				else
-				{
-					memset(Serial_RxFromTcpBuf, 0, sizeof Serial_RxFromTcpBuf);
-					strcat(Serial_RxFromTcpBuf, Rx_Temp);
-				}
-				memset(Rx_Temp, 0, sizeof Rx_Temp);
-				pRx_State = 0;
 				Serial_RxFlag = 1;
-			}
-			else
-			{	
-				Rx_Temp[pRx_State] = RxData;
-				pRx_State ++;
 			}
 		}
 		USART_ClearITPendingBit(USART1, USART_IT_RXNE);

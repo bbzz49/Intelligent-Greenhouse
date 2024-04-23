@@ -30,9 +30,9 @@
 .\objects\soilhumsensor.o: .\Library\misc.h
 .\objects\soilhumsensor.o: .\System\Delay.h
 .\objects\soilhumsensor.o: Hardware\AD.h
-.\objects\soilhumsensor.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson.h
+.\objects\soilhumsensor.o: E:\jansson-2.13.1\src\jansson.h
+.\objects\soilhumsensor.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\soilhumsensor.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\soilhumsensor.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\objects\soilhumsensor.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\soilhumsensor.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson_config.h
 .\objects\soilhumsensor.o: Hardware\Serial.h

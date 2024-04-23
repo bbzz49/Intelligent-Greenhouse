@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "serial.h": "c",
+        "typeinfo": "c",
+        "jansson.h": "c",
+        "esp8266.h": "c",
+        "_28byj48.h": "c",
+        "heatingcore.h": "c"
+    },
+    "KeilAssistant.Project.ExcludeList": [
+        
+        "template.uvproj",
+        "template.uvprojx"
+    ],
+    "C_Cpp.errorSquiggles": "disabled"
+}

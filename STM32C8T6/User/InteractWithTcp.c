@@ -1,4 +1,4 @@
-﻿#include "stm32f10x.h"// Device header
+#include "stm32f10x.h"// Device header
 #include "String.h"
 #include "Delay.h"
 #include "jansson.h"
@@ -18,12 +18,19 @@
 #include "Esp8266.h"
 #include "_28BYJ48.h"
 #include "sgp30.h"
-
+#include "stdlib.h"
+#include "MyRtc.h"
+uint8_t mode;
+float airT_Max = 25, airT_Min = 10, airH_Max = 80, airH_Min = 50, 
+	ph_Max = 9, ph_Min = 7, soilT_Max = 25, soilT_Min = 10, soilH_Max = 80, soilH_Min = 50; 
+uint16_t co2_Max = 2000, co2_Min = 500, light_Max = 2000 , light_Min = 100;
+uint8_t Led_Mode, Fan_Mode, Valve1_Mode, Valve2_Mode, Pump_Mode, HeatingCore_Mode, Curtain_Mode;
+uint16_t Led_WorkingTime[] = {480, 1080}, Fan_WorkingTime[] = {480, 1080}, Pump_WorkingTime[] = {480, 1080}, Curtain_WorkingTime[] = {480, 1080};
 void Module_Init(void)
 {
 	OLED_Init();
 	Esp8266_Init();
-	Esp8266_WifiAndTcp_Connect();
+	Esp8266_Mqtt_Connect();
 	BH1750_Init();
 	Pump_Init();
 	Valve1_Init();
@@ -39,182 +46,248 @@ void Module_Init(void)
 	_28BYJ48_Init();
 }
 
-void SendEventToTcp(char *identifier,uint8_t name)
-{
-	json_t *root;
-	char *jsonString;
-	char lengthString[4];
-	char cmd[20];
-	uint8_t length;
-	root = json_pack("{sssi}",
-		"identifier",identifier,
-		"name",name
-				);
-	jsonString = json_dumps(root, JSON_COMPACT);
-
-	length = strlen(jsonString);
-    sprintf(lengthString, "%d", length);
-	strcpy(cmd, "AT+CIPSEND=");
-	strcat(cmd, lengthString);
-	OLED_Clear();
-	OLED_ShowNum(1, 1, length, 3);
-	if(Esp8266_WriteCmd(cmd, "OK", "OK", 5))
-	{
-		Serial_SendString(jsonString);
-		Serial_RxFromEspBuf_Clear();
-	}
-	else ReconnectToTcp();
-
-	json_decref(root);
-	free(jsonString);
-	Delay_s(1);
-}
-
-void SendPropertyToTcp(void)
+void SendPropertyToMqtt(void)
 {	
-	Dth11_Read();
-	Multiple_read_BH1750();
-	SGP30_Read();
-	SoilHumValue_Get();
-	DS18B20_ReadT();
-	PhSensorValue_Get();
-	json_t *root;
-	char *jsonString;
-	char lengthString[4];
-	char cmd[20];
-	uint16_t length;
-	root = json_pack("{sfsfsisfsfsfsisisisisisisi}",
-				"airTemperature",air_temperature,
-				"airHumidity",air_humidity,
-				"lightIntensity",light,
-				"soilMoisture",soil_moisture,
-				"soilTemperature",soil_temperature,
-				"phValue",ph_value,
-				"co2Concentration",CO2Data,
-				"phSensorError",PhSensor_WorkStatus,
-				"airTempAndHumSensorError",DTH11_WorkStatus,
-				"soilTempSensorError",DS18B20_WorkStatus,
-				"soilHumSensorError",soilHumSensor_WorkStatus,
-				"co2SensorError",SGP30_WorkStatus,
-				"lightSensorError",BH1750_WorkStatus
-				);
-	
-	jsonString = json_dumps(root, JSON_COMPACT);
-	length = strlen(jsonString);
-    sprintf(lengthString, "%d", length);
-	strcpy(cmd, "AT+CIPSEND=");
-	strcat(cmd, lengthString);
-	OLED_Clear();
-	OLED_ShowNum(1, 1, length, 3);
-	
-	if(Esp8266_WriteCmd(cmd, "OK", "OK", 5))
+//	Dth11_Read();
+//	Multiple_read_BH1750();
+//	SGP30_Read();
+//	SoilHumValue_Get();
+//	DS18B20_ReadT();
+//	PhSensorValue_Get();
+	char buffer1[300];
+	char buffer2[300];
+	char *cmd = "AT+MQTTPUB=0,\"dev/stm\",\"%s\",0,0\r\n";
+	char *jsonString = "{\\\"airT\\\":%.1f\\,\\\"airH\\\":%.1f\\,\\\"light\\\":%d\\,\\\"soilH\\\":%.1f\\,\\\"soilT\\\":%.1f\\,\\\"ph\\\":%.1f\\,\\\"co2\\\":%d\\,\\\"phDevErr\\\":%d\\,\\\"ATHDevErr\\\":%d\\,\\\"soilTDevErr\\\":%d\\,\\\"soilHDevErr\\\":%d\\,\\\"co2DevErr\\\":%d\\,\\\"lightDevErr\\\":%d}";
+	sprintf(buffer1 , jsonString, air_temperature, air_humidity, light, 
+	soil_moisture, soil_temperature, ph_value, CO2Data, PhSensor_WorkStatus, 
+	DTH11_WorkStatus, DS18B20_WorkStatus, soilHumSensor_WorkStatus, SGP30_WorkStatus, BH1750_WorkStatus);
+	sprintf(buffer2, cmd, buffer1);
+	if(strlen(buffer2) >=256)
 	{
-		Serial_SendString(jsonString);
-		Serial_RxFromEspBuf_Clear();
+		OLED_ShowString(1,1,"ATcmd is too long");
+		Delay_s(60);
 	}
-	else ReconnectToTcp();
-	json_decref(root);
-	free(jsonString);
+
+	Serial_SendString(buffer2);
+	
+	Serial_RxFromEspBuf_Clear();
 }
 
-void HandleCommandFromTcp(void)
+
+void ControlDevice(void)
 {
-	if(Serial_GetRxFlag() == 1)//检查蹿接收缓冲区是否已经收到一个完整的json字符串命令
-	{	
-		uint16_t i,j;
-		char json[100] = {0};  //单个服务调用命令长度不超过100
-		//收到的json字符串命令的格式，想要在""里面表示"，需要使用\"
-		//char json_str[] = "{\"identifier\":\"light_control\", \"switch\": 1}"; 
+	char recv_cmd[200] = {0};  
+	char json[200] = {0};
+	if(Serial_GetRxFlag() == 1)
+	{
 		OLED_Clear();
 		OLED_ShowString(1,1,"Start");
-//		Delay_s(2);
-		for(i = 0,j = 0;i < 500;i ++)//遍历接收缓冲区
+		Delay_ms(500);
+		for(uint16_t i = 0,j = 0;i < 500 ;i ++)
 		{
-			if(Serial_RxFromTcpBuf[i] == '\n')//'\n'为每条json字符串命令之间的间隔
+			if(Serial_RxFromEspBuf[i] == '}')
 			{
-//				OLED_Clear();
-//				OLED_ShowString(1,1,"recognize a n");
-//				Delay_s(2);
-				if(Serial_RxFromTcpBuf[i+1] == '\0')//如果在代表json字符串间隔的'\n'后的是'\0',则代表后面没有数据了
+				recv_cmd[j ++] = Serial_RxFromEspBuf[i];
+				recv_cmd[j] = '\0';
+				for(char *p = recv_cmd;*p != '\0';p ++)
 				{
-//					OLED_Clear();
-//					OLED_ShowString(1,1,"complete!");
-//					Delay_s(2);
-					Serial_RxFromTcpBuf_Clear();//刷新整个接收缓存区
-					break;//跳出循环，本次处理服务器下发命令流程结束
+					if(*p == '{')
+					{
+						strcpy(json, p);
+						break;
+					}
 				}
-				else
+				if(strstr(recv_cmd,"prop/set") != NULL)
 				{
-//					OLED_Clear();
-//					OLED_ShowString(1,1,"Continue");
-//					Delay_s(2);
-					continue;//如果在代表json字符串间隔的'\n'后的不是\0',则代表后面还有数据
+					json_error_t error;
+					json_t *root;
+					const char *key;
+					json_t *value;
+					root = json_loads(json, 0, &error);
+					void *iter = json_object_iter(root);
+					if(json_is_object(root))
+					{
+						while(iter)
+						{
+							key = json_object_iter_key(iter);
+							value = json_object_iter_value(iter);
+
+							if(strcmp(key, "airT_Max") == 0) airT_Max = json_real_value(value);
+							else if(strcmp(key, "airT_Min") == 0) airT_Min = json_real_value(value);
+							else if(strcmp(key, "airH_Max") == 0) airH_Max = json_real_value(value);
+							else if(strcmp(key, "airH_Min") == 0) airH_Min = json_real_value(value);
+							else if(strcmp(key, "ph_Max") == 0) ph_Max = json_real_value(value);
+							else if(strcmp(key, "soilT_Max") == 0) soilT_Max = json_real_value(value);
+							else if(strcmp(key, "soilT_Min") == 0) soilT_Min = json_real_value(value);
+							else if(strcmp(key, "soilH_Max") == 0) soilH_Max = json_real_value(value);
+							else if(strcmp(key, "soilH_Min") == 0) soilH_Min = json_real_value(value);
+							else if(strcmp(key, "co2_Max") == 0) co2_Max = json_integer_value(value);
+							else if(strcmp(key, "co2_Min") == 0) co2_Min = json_real_value(value);
+							else if(strcmp(key, "light_Max") == 0) light_Max = json_integer_value(value);
+							else if(strcmp(key, "light_Min") == 0) light_Min = json_integer_value(value);
+							else if(strcmp(key, "Led_StartTime") == 0) Led_WorkingTime[0] = json_integer_value(value);
+							else if(strcmp(key, "Led_EndTime") == 0) Led_WorkingTime[1] = json_integer_value(value);
+							else if(strcmp(key, "Fan_StartTime") == 0) Fan_WorkingTime[0] = json_integer_value(value);
+							else if(strcmp(key, "Fan_EndTime") == 0) Fan_WorkingTime[1] = json_integer_value(value);
+							else if(strcmp(key, "Pump_StartTime") == 0) Pump_WorkingTime[0] = json_integer_value(value);
+							else if(strcmp(key, "Pump_EndTime") == 0) Pump_WorkingTime[1] = json_integer_value(value);
+							else if(strcmp(key, "Curtain_StartTime") == 0) Curtain_WorkingTime[0] = json_integer_value(value);
+							else if(strcmp(key, "Curtain_EndTime") == 0) Curtain_WorkingTime[1] = json_integer_value(value);
+							else if(strcmp(key, "Led_Mode") == 0) Led_Mode = json_integer_value(value);
+							else if(strcmp(key, "Fan_Mode") == 0) Fan_Mode = json_integer_value(value);
+							else if(strcmp(key, "Valve1_Mode") == 0) Valve1_Mode = json_integer_value(value);
+							else if(strcmp(key, "Valve2_Mode") == 0) Valve2_Mode = json_integer_value(value);
+							else if(strcmp(key, "Pump_Mode") == 0) Pump_Mode = json_integer_value(value);
+							else if(strcmp(key, "HeatingCore_Mode") == 0) HeatingCore_Mode = json_integer_value(value);
+							else if(strcmp(key, "Curtain_Mode") == 0) Curtain_Mode = json_integer_value(value);
+
+							iter = json_object_iter_next(root, iter);
+						}
+					}
+					json_decref(root);
 				}
-			}
-			else if(Serial_RxFromTcpBuf[i] == '}')//}为json字符串结束的标志
-			{
-				//解析json字符串的内容，执行相应操作
-				json[j] = Serial_RxFromTcpBuf[i];
-//				OLED_Clear();
-//				Serial_OledShowString(json);
-//				Delay_s(2);
-				//解析json，未测试
-				json_error_t error;
-				json_t *root;
-				char *identifier;
-				uint8_t Switch;
-				
-				root = json_loads((const char*)json, 0, &error); 
-				if(json_is_object(root))   
+				else if(strstr(recv_cmd,"service/call") != NULL)
 				{
-					identifier = (char *)json_string_value(json_object_get(root, "identifier"));
-					Switch = json_integer_value(json_object_get(root, "switch"));
+					json_error_t error;
+					json_t *root;
+					char *identifier;
+					uint8_t Switch;
+					
+					root = json_loads((const char*)json, 0, &error); 
+					if(json_is_object(root))   
+					{
+						identifier = (char *)json_string_value(json_object_get(root, "identifier"));
+						Switch = json_integer_value(json_object_get(root, "switch"));
+					}
+					json_decref(root);
+					if(strcmp(identifier,"lightControl") == 0 && Led_Mode == 0) {LED_Control(Switch);}
+					else if(strcmp(identifier,"fanControl") == 0 && Fan_Mode == 0) {Motor_Control(Switch);}
+					else if(strcmp(identifier,"pumpControl") == 0 && Pump_Mode == 0) {Pump_Control(Switch);}
+					else if(strcmp(identifier,"valve1Control") == 0 && Valve1_Mode == 0) {Valve1_Control(Switch);}
+					else if(strcmp(identifier,"valve2Control") == 0 && Valve2_Mode == 0) {Valve2_Control(Switch);}
+					else if(strcmp(identifier,"hcControl") == 0 && HeatingCore_Mode == 0) {HeatingCore_Control(Switch);}
+					else if(strcmp(identifier,"smotorControl") == 0 && Curtain_Mode == 0) {SteeperMotor_Control(Switch);}
 				}
-				else
-				{
-					//printf("root format error:%d-%s\r\n", error.line, error.text);
-					OLED_ShowString(1,1,"jiexiERROR");
-				}
-				json_decref(root);
-				OLED_Clear();
-				OLED_ShowString(1,1,identifier);
-				OLED_ShowNum(2,1,Switch,1);
-//				Delay_s(2);
-				memset(json, 0, sizeof json);//刷新接收单个json字符串命令的缓存区
+
+				Serial_OledShowString(json);
+				Delay_s(5);
+				memset(json, 0, sizeof json);
+				memset(recv_cmd, 0, sizeof recv_cmd);
 				j = 0;
-				if(strcmp(identifier,"lightControl") == 0) {LED_Control(Switch);}
-				else if(strcmp(identifier,"fanControl") == 0) {Motor_Control(Switch);}
-				else if(strcmp(identifier,"pumpControl") == 0) {Pump_Control(Switch);}
-				else if(strcmp(identifier,"valve1Control") == 0) {Valve1_Control(Switch);}
-				else if(strcmp(identifier,"valve2Control") == 0) {Valve2_Control(Switch);}
-				else if(strcmp(identifier,"hcControl") == 0) {HeatingCore_Control(Switch);}
-				else if(strcmp(identifier,"smotorControl") == 0) {SteeperMotor_Control(Switch);}
-				
 			}
-			else if(Serial_RxFromTcpBuf[i] == '\0')//说明接收缓存区有未接受完整的json字符串
+			else if(Serial_RxFromEspBuf[i] == '\n')
 			{
-				OLED_ShowString(1,1,"cmd not complete");
-				Delay_s(2);
-				uint8_t Count = 5;
-				do
+				if(Serial_RxFromEspBuf[i + 1] == '\0')
 				{
-					Count --;
-					Delay_us(100);//等待串口接收中断刷新接收缓存区
-				}
-				while(Serial_RxFromTcpBuf[i] != '\0' || Count == 0);//接收缓存区已被刷新
-				
-				if(Count == 0)
-				{
-					OLED_ShowString(1,1,"ERROR");
+					OLED_Clear();
+					OLED_ShowString(1,1,"complete");
+					Delay_ms(500);
+					Serial_RxFromEspBuf_Clear();
+					Serial_GetRxFlag();
 					break;
 				}
-				i --; continue;//重新开始本次循环
+				else
+				{
+					OLED_Clear();
+					OLED_ShowString(1,1,"continue");
+					Delay_ms(500);
+					continue;
+				}
 			}
-			else
-			{	
-				json[j] = Serial_RxFromTcpBuf[i];
-				j ++;
-			}
+			else recv_cmd[j ++] = Serial_RxFromEspBuf[i];
+		}
+	}
+	MyRTC_ReadTime();
+	switch (Led_Mode)
+	{
+		case 1:
+		{
+			if(light < light_Min) LED_Control(1);
+			else if(light > light_Max) LED_Control(0);
+			break;	
+		}
+		case 2:
+		{
+			uint16_t current_time;
+			current_time = MyRTC_Time[3] * 60 + MyRTC_Time[4];
+			if((current_time - Led_WorkingTime[0]) >= 0 &&  (current_time - Led_WorkingTime[1]) <= 0) LED_Control(1);
+			else LED_Control(0);
+			break;
+		}
+	}
+	switch (Fan_Mode)
+	{
+		case 1:
+		{
+			if(CO2Data > co2_Max) Motor_Control(1);
+			else if(CO2Data > co2_Min) Motor_Control(0);
+			break;	
+		}
+		case 2:
+		{
+			uint16_t current_time = MyRTC_Time[3] * 60 + MyRTC_Time[4];
+			if((current_time - Fan_WorkingTime[0]) >=0 &&  (current_time - Fan_WorkingTime[1]) <=0) Motor_Control(1);
+			else Motor_Control(0);
+			break;
+		}
+	}
+	switch (Valve1_Mode)
+	{
+		case 1:
+		{
+			if(ph_value < ph_Min) Valve1_Control(1);
+			else Valve1_Control(0);
+			break;
+		}	
+	}
+	switch (Valve2_Mode)
+	{
+		case 1:
+		{
+			if(ph_value > ph_Max) Valve1_Control(1);
+			else Valve1_Control(0);
+			break;
+		}	
+	}
+	switch (Curtain_Mode)
+	{
+		case 1:
+		{
+			if(light < light_Min) LED_Control(1);
+			else if(light > light_Max) LED_Control(0);
+			break;
+		}	
+		case 2:
+		{
+			uint16_t current_time = MyRTC_Time[3] * 60 + MyRTC_Time[4];
+			if((current_time - Curtain_WorkingTime[0]) >=0 &&  (current_time - Curtain_WorkingTime[1]) <=0) SteeperMotor_Control(1);
+			else SteeperMotor_Control(0);
+			break;
+		}
+	}
+	switch (Pump_Mode)
+	{
+		case 1:
+		{
+			if(soil_moisture < soilH_Min) Pump_Control(1);
+			else if(soil_moisture > soilH_Max) Pump_Control(0);
+			break;	
+		}
+		case 2:
+		{
+			uint16_t current_time = MyRTC_Time[3] * 60 + MyRTC_Time[4];
+			if((current_time - Pump_WorkingTime[0]) >=0 &&  (current_time - Pump_WorkingTime[1]) <=0) Pump_Control(1);
+			else Pump_Control(0);
+			break;
+		}
+	}
+	switch (HeatingCore_Mode)
+	{
+		case 1:
+		{
+			if(soil_temperature < soilT_Min) HeatingCore_Control(1);
+			else if(soil_temperature > soilT_Max) HeatingCore_Control(0);
+			break;	
 		}
 	}
 }

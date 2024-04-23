@@ -34,8 +34,8 @@
 .\objects\ds18b20.o: E:\Keil5\ARM\ARMCC\Bin\..\include\string.h
 .\objects\ds18b20.o: Hardware\Serial.h
 .\objects\ds18b20.o: Hardware\DS18B20.h
-.\objects\ds18b20.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson.h
+.\objects\ds18b20.o: E:\jansson-2.13.1\src\jansson.h
+.\objects\ds18b20.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\ds18b20.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\ds18b20.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\objects\ds18b20.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\ds18b20.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson_config.h

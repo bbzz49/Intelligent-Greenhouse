@@ -31,9 +31,9 @@
 .\objects\phsensor.o: Hardware\AD.h
 .\objects\phsensor.o: Hardware\Serial.h
 .\objects\phsensor.o: E:\Keil5\ARM\ARMCC\Bin\..\include\String.h
-.\objects\phsensor.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson.h
+.\objects\phsensor.o: E:\jansson-2.13.1\src\jansson.h
+.\objects\phsensor.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\phsensor.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\phsensor.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\objects\phsensor.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\phsensor.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson_config.h
 .\objects\phsensor.o: E:\Keil5\ARM\ARMCC\Bin\..\include\math.h

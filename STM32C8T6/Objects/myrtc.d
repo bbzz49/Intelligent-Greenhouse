@@ -28,9 +28,4 @@
 .\objects\myrtc.o: .\Library\stm32f10x_usart.h
 .\objects\myrtc.o: .\Library\stm32f10x_wwdg.h
 .\objects\myrtc.o: .\Library\misc.h
-.\objects\myrtc.o: System\MyRtc.h
-.\objects\myrtc.o: System\sys.h
-.\objects\myrtc.o: E:\Keil5\ARM\ARMCC\Bin\..\include\string.h
-.\objects\myrtc.o: .\Hardware\led.h
-.\objects\myrtc.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\objects\myrtc.o: System\Delay.h
+.\objects\myrtc.o: E:\Keil5\ARM\ARMCC\Bin\..\include\time.h

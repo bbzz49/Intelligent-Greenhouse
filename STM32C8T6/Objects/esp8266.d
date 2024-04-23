@@ -35,8 +35,3 @@
 .\objects\esp8266.o: Hardware\LED.h
 .\objects\esp8266.o: .\System\sys.h
 .\objects\esp8266.o: Hardware\Motor.h
-.\objects\esp8266.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson.h
-.\objects\esp8266.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
-.\objects\esp8266.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\objects\esp8266.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
-.\objects\esp8266.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson_config.h

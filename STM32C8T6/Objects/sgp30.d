@@ -30,10 +30,10 @@
 .\objects\sgp30.o: .\Library\misc.h
 .\objects\sgp30.o: .\System\Delay.h
 .\objects\sgp30.o: Hardware\Serial.h
-.\objects\sgp30.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson.h
+.\objects\sgp30.o: E:\jansson-2.13.1\src\jansson.h
+.\objects\sgp30.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\sgp30.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\sgp30.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\objects\sgp30.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\sgp30.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson_config.h
 .\objects\sgp30.o: Hardware\My_I2C.h
 .\objects\sgp30.o: Hardware\OLED.h

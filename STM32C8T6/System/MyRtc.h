@@ -1,37 +1,10 @@
-﻿#ifndef __MYRTC_H
-#define __MYRTC_H 
-#include "sys.h"
+#ifndef __MYRTC_H
+#define __MYRTC_H
 
-typedef struct 
-{
-	u8 hour;
-	u8 min;
-	u8 sec;	
-	
-	//??????
-	u16 w_year;
-	u8  w_month;
-	u8  w_date;
-	u8  week;		 
-}_calendar;					 
-extern _calendar calendar;	
+extern uint16_t MyRTC_Time[];
 
-struct SET_ALARM
-{
-	s8 hour;
-	s8 minute;
-	u8 week;
-};
-
-    
-u8 RTC_Init_LSI(void);
-u8 RTC_Init_LSE(void);
-u8 Is_Leap_Year(u16 year);
-u8 RTC_Alarm_Set(u16 syear,u8 smon,u8 sday,u8 hour,u8 min,u8 sec);
-u8 RTC_Get(void);       
-u8 RTC_Get_Week(u16 year,u8 month,u8 day);
-u8 RTC_Set(u16 syear,u8 smon,u8 sday,u8 hour,u8 min,u8 sec);
-void  get_time(void);
-
+void MyRTC_Init(void);
+void MyRTC_SetTime(void);
+void MyRTC_ReadTime(void);
 
 #endif

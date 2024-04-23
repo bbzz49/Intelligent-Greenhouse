@@ -30,10 +30,10 @@
 .\objects\interactwithtcp.o: .\Library\misc.h
 .\objects\interactwithtcp.o: E:\Keil5\ARM\ARMCC\Bin\..\include\String.h
 .\objects\interactwithtcp.o: .\System\Delay.h
-.\objects\interactwithtcp.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson.h
+.\objects\interactwithtcp.o: E:\jansson-2.13.1\src\jansson.h
+.\objects\interactwithtcp.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\interactwithtcp.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\interactwithtcp.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\objects\interactwithtcp.o: E:\Keil5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\interactwithtcp.o: E:\Keil5\ARM\PACK\Keil\Jansson\1.0.0\src\jansson_config.h
 .\objects\interactwithtcp.o: .\Hardware\Serial.h
 .\objects\interactwithtcp.o: .\Hardware\OLED.h
@@ -52,3 +52,4 @@
 .\objects\interactwithtcp.o: .\Hardware\Esp8266.h
 .\objects\interactwithtcp.o: .\Hardware\_28BYJ48.h
 .\objects\interactwithtcp.o: .\Hardware\sgp30.h
+.\objects\interactwithtcp.o: .\System\MyRtc.h
